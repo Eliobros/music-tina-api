@@ -9,7 +9,7 @@ const ytdl = require('ytdl-core');
 const app = express();
 
 // Use a variável de ambiente PORT fornecida pelo Railway (ou 3000 como fallback)
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT
 
 // Outras variáveis de ambiente (exemplo)
 const { YOUTUBE_API_KEY, AUTOR_API, DONO_API, DEVELOPMENT_DAY, NAME_API, VERSION_API, INFO_USE, DIR_GENERATE_KEY } = process.env;
