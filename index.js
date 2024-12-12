@@ -12,7 +12,7 @@ const app = express();
 const PORT = process.env.PORT
 
 // Outras variáveis de ambiente (exemplo)
-const { YOUTUBE_API_KEY, AUTOR_API, DONO_API, DEVELOPMENT_DAY, NAME_API, VERSION_API, INFO_USE, DIR_GENERATE_KEY } = process.env;
+const { YOUTUBE_API_KEY, AUTOR_API, DONO_API, DEVELOPMENT_DAY, NAME_API, VERSION_API, INFO_USE, DIR_GENERATE_KEY } = require('config');
 
 app.use(express.json()); // Para processar o corpo das requisições JSON
 
