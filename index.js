@@ -7,8 +7,12 @@ const path = require('path');
 const ytsr = require('youtube-api-v3-search');
 const ytdl = require('ytdl-core');
 const app = express();
-const PORT = 3000;
-const { YOUTUBE_API_KEY, AUTOR_API, DONO_API, DEVELOPMENT_DAY, NAME_API, VERSION_API, INFO_USE, DIR_GENERATE_KEY } = require('./config');
+
+// Use a variável de ambiente PORT fornecida pelo Railway (ou 3000 como fallback)
+const PORT = process.env.PORT || 3000;
+
+// Outras variáveis de ambiente (exemplo)
+const { YOUTUBE_API_KEY, AUTOR_API, DONO_API, DEVELOPMENT_DAY, NAME_API, VERSION_API, INFO_USE, DIR_GENERATE_KEY } = process.env;
 
 app.use(express.json()); // Para processar o corpo das requisições JSON
 
