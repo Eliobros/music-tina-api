@@ -1,12 +1,12 @@
 {
-  "name": "api",
+  "name": "api music bot",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "Eliobros Tech",
   "license": "ISC",
   "dependencies": {
     "axios": "^1.7.9",
