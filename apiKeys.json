@@ -3,5 +3,10 @@
     "apiName": "ApiTeste",
     "apiKey": "4741d65e-fda0-4fa3-9a73-ef6c8ed79a20",
     "expirationDate": "2025-01-09T13:45:11.473Z"
+  },
+  {
+    "apiName": "Tina-Bot",
+    "apiKey": "6191b191-9470-4d19-a91c-2b1dd9840e67",
+    "expirationDate": "2025-01-10T05:28:06.894Z"
   }
 ]
