@@ -9,7 +9,7 @@ const ytdl = require('ytdl-core');
 const app = express();
 
 // Use a variável de ambiente PORT fornecida pelo Railway (ou 3000 como fallback)
-const PORT = process.env.PORT
+const PORT = process.env.PORT || 3000;
 
 // Outras variáveis de ambiente (exemplo)
 const { YOUTUBE_API_KEY, AUTOR_API, DONO_API, DEVELOPMENT_DAY, NAME_API, VERSION_API, INFO_USE, DIR_GENERATE_KEY } = require('./config');
@@ -205,7 +205,7 @@ const downloadAudio = (videoUrl, audioFilePath, videoTitle, res) => {
 };
 
 // Rota de música - Exemplo de como pegar áudio do YouTube
-app.get('/api/music', (req, res) => {
+app.get('/api/music', async (req, res) => { // Torne a função assíncrona
   // Verifica se a requisição foi feita com a chave de API
   if (!req.headers['x-api-key']) {
     return res.status(200).json({
@@ -222,7 +222,7 @@ app.get('/api/music', (req, res) => {
 
   // Restante do código para buscar o vídeo no YouTube e processar o áudio
   try {
-    const response = await ytsr(YOUTUBE_API_KEY, query);
+    const response = await ytsr(YOUTUBE_API_KEY, { query });
     const video = response.items[0];
 
     if (!video) {
