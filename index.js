@@ -209,22 +209,60 @@ const downloadAudio = (videoUrl, audioFilePath, videoTitle, res) => {
 };
 
 app.get('/api/music', async (req, res) => {
-  // Verifica se a requisição foi feita com a chave de API
+  // Verifica se a chave de API foi fornecida
   if (!req.headers['x-api-key']) {
     return res.status(200).json({
-      message: 'API RODANDO. VOCÊ JÁ PODE FAZER REQUISIÇÕES. NÃO ESQUEÇA DE GERAR A API PELO LINK https://music-tina-api-production.up.railway.app/generate-api-key'
+      message: 'API rodando. Não se esqueça de gerar a chave de API.'
     });
   }
 
-  // Se a chave de API for fornecida, prossegue com o processo de validação e execução
+  // Valida o parâmetro 'query'
   const { query } = req.query;
-
   if (!query) {
     return res.status(400).json({ error: 'Parâmetro "query" é necessário.' });
   }
 
-  // Restante do código para buscar o vídeo no YouTube e processar o áudio
   try {
+    // Busca o vídeo no YouTube com base no 'query'
+    const response = await ytsr(YOUTUBE_API_KEY, query);
+    const video = response.items[0];
+
+    if (!video) {
+      return res.status(404).json({ error: 'Vídeo não encontrado no YouTube.' });
+    }
+
+    // Retorna o resultado da pesquisa
+    res.json({
+      message: "Resultados encontrados.",
+      data: {
+        title: video.snippet.title,
+        videoUrl: `https://www.youtube.com/watch?v=${video.id.videoId}`,
+        thumbnail: video.snippet.thumbnails.high.url,
+      },
+    });
+
+  } catch (error) {
+    console.error('Erro ao buscar vídeo no YouTube:', error);
+    res.status(500).json({ error: 'Erro ao buscar o vídeo no YouTube.' });
+  }
+});
+
+app.get('/api/music/download', async (req, res) => {
+  // Verifica se a chave de API foi fornecida
+  if (!req.headers['x-api-key']) {
+    return res.status(200).json({
+      message: 'API rodando. Não se esqueça de gerar a chave de API.'
+    });
+  }
+
+  // Valida o parâmetro 'query'
+  const { query } = req.query;
+  if (!query) {
+    return res.status(400).json({ error: 'Parâmetro "query" é necessário.' });
+  }
+
+  try {
+    // Busca o vídeo no YouTube com base no 'query'
     const response = await ytsr(YOUTUBE_API_KEY, query);
     const video = response.items[0];
 
