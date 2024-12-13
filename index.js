@@ -244,6 +244,7 @@ app.get('/api/music', async (req, res) => {
   }
 });
 
-
-// Iniciar o servidor
+//ouvir na porta ou rodar a api
 app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
+});
