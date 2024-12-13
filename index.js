@@ -4,9 +4,9 @@ const uuid = require('uuid');
 const axios = require('axios');
 const ffmpeg = require('fluent-ffmpeg');
 const path = require('path');
-const ytsr = require('youtube-api-v3-search');
 const ytdl = require('ytdl-core');
 const app = express();
+const { google } = require('googleapis');
 
 // Use a variável de ambiente PORT fornecida pelo Railway (ou 3000 como fallback)
 const PORT = process.env.PORT || 3000;
@@ -208,30 +208,28 @@ const downloadAudio = (videoUrl, audioFilePath, videoTitle, res) => {
     });
 };
 
-app.get('/api/music', async (req, res) => {
-  // Verifica se a chave de API foi fornecida
-  if (!req.headers['x-api-key']) {
-    return res.status(200).json({
-      message: 'API rodando. Não se esqueça de gerar a chave de API.'
-    });
-  }
 
-  // Valida o parâmetro 'query'
-  const { query } = req.query;
-  if (!query) {
-    return res.status(400).json({ error: 'Parâmetro "query" é necessário.' });
-  }
+
+app.get('/api/music',async function searchVideo(req, res) {
+  const youtube = google.youtube({
+    version: 'v3',
+    auth: YOUTUBE_API_KEY, // Sua chave da API do YouTube
+  });
 
   try {
-    // Busca o vídeo no YouTube com base no 'query'
-    const response = await ytsr(YOUTUBE_API_KEY, query);
-    const video = response.items[0];
+    const response = await youtube.search.list({
+      part: 'snippet',
+      q: req.query.query, // Parâmetro de consulta passado na URL
+      type: 'video',
+      maxResults: 1, // Número de resultados que você quer buscar
+    });
 
-    if (!video) {
-      return res.status(404).json({ error: 'Vídeo não encontrado no YouTube.' });
+    if (!response.data.items || response.data.items.length === 0) {
+      return res.status(404).json({ error: 'Nenhum vídeo encontrado.' });
     }
 
-    // Retorna o resultado da pesquisa
+    const video = response.data.items[0];
+
     res.json({
       message: "Resultados encontrados.",
       data: {
@@ -240,12 +238,12 @@ app.get('/api/music', async (req, res) => {
         thumbnail: video.snippet.thumbnails.high.url,
       },
     });
-
   } catch (error) {
-    console.error('Erro ao buscar vídeo no YouTube:', error);
-    res.status(500).json({ error: 'Erro ao buscar o vídeo no YouTube.' });
+    console.error('Erro ao buscar vídeo no YouTube:', error.message);
+    res.status(500).json({ error: 'Erro ao buscar o vídeo no YouTube. Detalhes: ' + error.message });
   }
-});
+}
+
 
 app.get('/api/music/download', async (req, res) => {
   // Verifica se a chave de API foi fornecida
