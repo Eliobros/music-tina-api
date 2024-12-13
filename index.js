@@ -242,7 +242,7 @@ app.get('/api/music',async function searchVideo(req, res) {
     console.error('Erro ao buscar vídeo no YouTube:', error.message);
     res.status(500).json({ error: 'Erro ao buscar o vídeo no YouTube. Detalhes: ' + error.message });
   }
-}
+});
 
 
 app.get('/api/music/download', async (req, res) => {
