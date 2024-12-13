@@ -15,7 +15,7 @@ const PORT = process.env.PORT || 3000;
 const { YOUTUBE_API_KEY, AUTOR_API, DONO_API, DEVELOPMENT_DAY, NAME_API, VERSION_API, INFO_USE, DIR_GENERATE_KEY } = require('./config');
 
 app.use(express.json()); // Para processar o corpo das requisições JSON
-app.use(express.static(DIR_GENERATE_KEY)); // Serve arquivos estáticos da pasta 'public'
+app.use(express.static(`${DIR_GENERATE_KEY}`)); // Serve arquivos estáticos da pasta 'public'
 
 // Funções para manipular as chaves de API
 const getApiKeys = () => {
@@ -57,8 +57,8 @@ const verifyApiKey = (req, res, next) => {
 };
 
 // Rota para a página de geração de chave
-app.get('/generate-api-key', (req, res) => {
-  // O Express vai procurar o arquivo 'generate-api-key.html' na pasta 'public'
+app.get('/api/generate-api-key', (req, res) => {
+  // O Express vai procurar o arquivo 'generate-api-key.html' na pasta 'public
   res.sendFile(path.join(DIR_GENERATE_KEY, 'generate-api-key.html'));
 });
 
@@ -247,5 +247,3 @@ app.get('/api/music', async (req, res) => {
 
 // Iniciar o servidor
 app.listen(PORT, () => {
-  console.log(`API rodando em http://localhost:${PORT}`);
-});
