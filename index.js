@@ -210,7 +210,7 @@ const downloadAudio = (videoUrl, audioFilePath, videoTitle, res) => {
 
 
 
-app.get('/api/music',async function searchVideo(req, res) {
+app.get('/api/music', async function searchVideo(req, res) {
   const youtube = google.youtube({
     version: 'v3',
     auth: YOUTUBE_API_KEY, // Sua chave da API do YouTube
