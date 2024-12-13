@@ -205,13 +205,22 @@ const downloadAudio = (videoUrl, audioFilePath, videoTitle, res) => {
 };
 
 // Rota de música - Exemplo de como pegar áudio do YouTube
-app.get('/api/music', verifyApiKey, async (req, res) => {
+app.get('/api/music', (req, res) => {
+  // Verifica se a requisição foi feita com a chave de API
+  if (!req.headers['x-api-key']) {
+    return res.status(200).json({
+      message: 'API RODANDO. VOCÊ JÁ PODE FAZER REQUISIÇÕES. NÃO ESQUEÇA DE GERAR A API PELO LINK https://music-tina-api-production.up.railway.app/generate-api-key'
+    });
+  }
+
+  // Se a chave de API for fornecida, prossegue com o processo de validação e execução
   const { query } = req.query;
 
   if (!query) {
     return res.status(400).json({ error: 'Parâmetro "query" é necessário.' });
   }
 
+  // Restante do código para buscar o vídeo no YouTube e processar o áudio
   try {
     const response = await ytsr(YOUTUBE_API_KEY, query);
     const video = response.items[0];
