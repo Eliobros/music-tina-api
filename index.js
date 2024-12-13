@@ -208,8 +208,7 @@ const downloadAudio = (videoUrl, audioFilePath, videoTitle, res) => {
     });
 };
 
-// Rota de música - Exemplo de como pegar áudio do YouTube
-app.get('/api/music', (req, res) => {
+app.get('/api/music', async (req, res) => {
   // Verifica se a requisição foi feita com a chave de API
   if (!req.headers['x-api-key']) {
     return res.status(200).json({
@@ -244,6 +243,7 @@ app.get('/api/music', (req, res) => {
     res.status(500).json({ error: 'Erro ao buscar o vídeo no YouTube.' });
   }
 });
+
 
 // Iniciar o servidor
 app.listen(PORT, () => {
