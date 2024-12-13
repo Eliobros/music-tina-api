@@ -56,7 +56,7 @@ const verifyApiKey = (req, res, next) => {
 };
 
 // Servir arquivos estáticos da pasta 'public'
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(`${DIR_GENERATE_KEY}`)));
 
 // Rota para obter informações sobre a API
 app.get('/api', (req, res) => {
