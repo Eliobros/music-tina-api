@@ -15,6 +15,7 @@ const PORT = process.env.PORT || 3000;
 const { YOUTUBE_API_KEY, AUTOR_API, DONO_API, DEVELOPMENT_DAY, NAME_API, VERSION_API, INFO_USE, DIR_GENERATE_KEY } = require('./config');
 
 app.use(express.json()); // Para processar o corpo das requisições JSON
+app.use(express.static(DIR_GENERATE_KEY)); // Serve arquivos estáticos da pasta 'public'
 
 // Funções para manipular as chaves de API
 const getApiKeys = () => {
@@ -31,7 +32,7 @@ const saveApiKeys = (keys) => {
 
 // Middleware para verificar a chave de API
 const verifyApiKey = (req, res, next) => {
-  const apiKey = req.headers['x-api-key']; 
+  const apiKey = req.headers['x-api-key'];
 
   if (!apiKey) {
     return res.status(401).json({ error: 'Chave de API é necessária.' });
@@ -55,102 +56,105 @@ const verifyApiKey = (req, res, next) => {
   next();
 };
 
-// Servir arquivos estáticos da pasta 'public'
-app.use(express.static(DIR_GENERATE_KEY));
+// Rota para a página de geração de chave
+app.get('/generate-api-key', (req, res) => {
+  // O Express vai procurar o arquivo 'generate-api-key.html' na pasta 'public'
+  res.sendFile(path.join(DIR_GENERATE_KEY, 'generate-api-key.html'));
+});
 
 // Rota para obter informações sobre a API
 app.get('/api', (req, res) => {
-    res.json({
-        name: `${NAME_API}`,
-        version: `${VERSION_API}`,
-        development_day: `${DEVELOPMENT_DAY}`,
-        description: "API para baixar e converter áudio de vídeos do YouTube. Esta API foi desenvolvida pela empresa Eliobros Tech.",
-        autor: `${AUTOR_API}`,
-        routes: "api/music, generate-api-key",
-        dono: `${DONO_API}`,
-        info: `${INFO_USE}`,
-        endpoints: [
-            {
-                path: "/api/music",
-                method: "GET",
-                description: "Obtém o áudio de um vídeo do YouTube (requisição de música).",
-                parameters: [
-                    {
-                        name: "query",
-                        type: "string",
-                        required: true,
-                        description: "Nome da música ou vídeo para buscar no YouTube."
-                    }
-                ],
-                example_request: "GET /api/music?query=nome+da+musica",
-                example_response: {
-                    status: 200,
-                    body: {
-                        message: "Áudio baixado com sucesso.",
-                        data: {
-                            title: "Nome da música",
-                            download_link: "https://example.com/download.mp3"
-                        }
-                    }
-                },
-                status_codes: {
-                    "200": "Sucesso",
-                    "400": "Parâmetro 'query' é necessário.",
-                    "404": "Vídeo não encontrado no YouTube.",
-                    "500": "Erro ao processar o áudio."
-                }
-            },
-            {
-                path: "/api/generate-api-key",
-                method: "POST",
-                description: "Gera uma nova chave de API para o usuário.",
-                parameters: [
-                    {
-                        name: "apiName",
-                        type: "string",
-                        required: true,
-                        description: "Nome da API para gerar a chave."
-                    }
-                ],
-                example_request: {
-                    method: "POST",
-                    body: {
-                        apiName: "Nome da API"
-                    }
-                },
-                example_response: {
-                    status: 200,
-                    body: {
-                        message: "Chave de API gerada com sucesso.",
-                        apiKey: "gerada-api-key",
-                        expirationDate: "2025-01-07T00:00:00Z"
-                    }
-                },
-                status_codes: {
-                    "200": "Sucesso",
-                    "400": "Nome da API é obrigatório."
-                }
-            }
+  res.json({
+    name: `${NAME_API}`,
+    version: `${VERSION_API}`,
+    development_day: `${DEVELOPMENT_DAY}`,
+    description: "API para baixar e converter áudio de vídeos do YouTube. Esta API foi desenvolvida pela empresa Eliobros Tech.",
+    autor: `${AUTOR_API}`,
+    routes: "api/music, generate-api-key",
+    dono: `${DONO_API}`,
+    info: `${INFO_USE}`,
+    endpoints: [
+      {
+        path: "/api/music",
+        method: "GET",
+        description: "Obtém o áudio de um vídeo do YouTube (requisição de música).",
+        parameters: [
+          {
+            name: "query",
+            type: "string",
+            required: true,
+            description: "Nome da música ou vídeo para buscar no YouTube."
+          }
         ],
-        contact: {
-            email: "suporte@eliobrostech.com",
-            website: "https://eliobrostech.com"
-        },
-        limits: {
-            requests_per_minute: 60,
-            requests_per_hour: 1000
-        },
-        faq: [
-            {
-                question: "Como obtenho uma chave de API?",
-                answer: "Você pode obter uma chave de API acessando a rota /generate-api-key com uma requisição POST."
-            },
-            {
-                question: "Qual é o limite de uso da API?",
-                answer: "Você pode fazer até 60 requisições por minuto e 1000 requisições por hora."
+        example_request: "GET /api/music?query=nome+da+musica",
+        example_response: {
+          status: 200,
+          body: {
+            message: "Áudio baixado com sucesso.",
+            data: {
+              title: "Nome da música",
+              download_link: "https://example.com/download.mp3"
             }
-        ]
-    });
+          }
+        },
+        status_codes: {
+          "200": "Sucesso",
+          "400": "Parâmetro 'query' é necessário.",
+          "404": "Vídeo não encontrado no YouTube.",
+          "500": "Erro ao processar o áudio."
+        }
+      },
+      {
+        path: "/api/generate-api-key",
+        method: "POST",
+        description: "Gera uma nova chave de API para o usuário.",
+        parameters: [
+          {
+            name: "apiName",
+            type: "string",
+            required: true,
+            description: "Nome da API para gerar a chave."
+          }
+        ],
+        example_request: {
+          method: "POST",
+          body: {
+            apiName: "Nome da API"
+          }
+        },
+        example_response: {
+          status: 200,
+          body: {
+            message: "Chave de API gerada com sucesso.",
+            apiKey: "gerada-api-key",
+            expirationDate: "2025-01-07T00:00:00Z"
+          }
+        },
+        status_codes: {
+          "200": "Sucesso",
+          "400": "Nome da API é obrigatório."
+        }
+      }
+    ],
+    contact: {
+      email: "suporte@eliobrostech.com",
+      website: "https://eliobrostech.com"
+    },
+    limits: {
+      requests_per_minute: 60,
+      requests_per_hour: 1000
+    },
+    faq: [
+      {
+        question: "Como obtenho uma chave de API?",
+        answer: "Você pode obter uma chave de API acessando a rota /generate-api-key com uma requisição POST."
+      },
+      {
+        question: "Qual é o limite de uso da API?",
+        answer: "Você pode fazer até 60 requisições por minuto e 1000 requisições por hora."
+      }
+    ]
+  });
 });
 
 // Rota para gerar uma chave de API
@@ -205,7 +209,7 @@ const downloadAudio = (videoUrl, audioFilePath, videoTitle, res) => {
 };
 
 // Rota de música - Exemplo de como pegar áudio do YouTube
-app.get('/api/music', async (req, res) => { // Torne a função assíncrona
+app.get('/api/music', (req, res) => {
   // Verifica se a requisição foi feita com a chave de API
   if (!req.headers['x-api-key']) {
     return res.status(200).json({
@@ -222,7 +226,7 @@ app.get('/api/music', async (req, res) => { // Torne a função assíncrona
 
   // Restante do código para buscar o vídeo no YouTube e processar o áudio
   try {
-    const response = await ytsr(YOUTUBE_API_KEY, { query });
+    const response = await ytsr(YOUTUBE_API_KEY, query);
     const video = response.items[0];
 
     if (!video) {
