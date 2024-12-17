@@ -7,10 +7,15 @@ const path = require('path');
 const ytdl = require('ytdl-core');
 const { google } = require('googleapis'); // Importar corretamente o googleapis
 const app = express();
-const PORT = 3000;
-const { YOUTUBE_API_KEY, AUTOR_API, DONO_API, DEVELOPMENT_DAY, NAME_API, VERSION_API, INFO_USE, DIR_GENERATE_KEY } = require('./config');
+
+// Use a variável de ambiente PORT fornecida pelo Railway (ou 3000 como fallback)
+const PORT = process.env.PORT || 3000;
+
+// Outras variáveis de ambiente (exemplo)
+const { YOUTUBE_API_KEY, METEOBLUE_API_KEY, AUTOR_API, DONO_API, DEVELOPMENT_DAY, NAME_API, VERSION_API, INFO_USE, DIR_GENERATE_KEY, API_PIXELS_KEY, API_PIXELS_URL } = require('./config');
 
 app.use(express.json()); // Para processar o corpo das requisições JSON
+app.use(express.static('public')); // Servir arquivos estáticos da pasta 'public'
 
 // Funções para manipular as chaves de API
 const getApiKeys = () => {
@@ -51,8 +56,10 @@ const verifyApiKey = (req, res, next) => {
   next();
 };
 
-// Servir arquivos estáticos da pasta 'public'
-app.use(express.static(path.join(__dirname, 'public')));
+// Rota para a página de geração de chave
+app.get('/api/generate-api-key', (req, res) => {
+  res.sendFile(path.join(DIR_GENERATE_KEY, 'generate-api-key.html'));
+});
 
 // Rota para obter informações sobre a API
 app.get('/api', (req, res) => {
@@ -200,16 +207,61 @@ const downloadAudio = (videoUrl, audioFilePath, videoTitle, res) => {
     });
 };
 
-// Rota de música - Exemplo de como pegar áudio do YouTube
-app.get('/api/music', verifyApiKey, async (req, res) => {
+// Rota para buscar vídeos no YouTube
+app.get('/api/music', async (req, res) => {
+  const youtube = google.youtube({
+    version: 'v3',
+    auth: YOUTUBE_API_KEY, // Sua chave da API do YouTube
+  });
+
+  try {
+    const response = await youtube.search.list({
+      part: 'snippet',
+      q: req.query.query, // Parâmetro de consulta passado na URL
+      type: 'video',
+      maxResults: 6, // Número de resultados que você quer buscar
+    });
+
+    if (!response.data.items || response.data.items.length === 0) {
+      return res.status(404).json({ error: 'Nenhum vídeo encontrado.' });
+    }
+
+    const video = response.data.items[0];
+
+    res.json({
+      message: "Resultados encontrados.",
+      data: {
+        title: video.snippet.title,
+        videoUrl: `https://www.youtube.com/watch?v=${video.id.videoId}`,
+        thumbnail: video.snippet.thumbnails.high.url,
+      },
+    });
+  } catch (error) {
+    console.error('Erro ao buscar vídeo no YouTube:', error.message);
+    res.status(500).json({ error: 'Erro ao buscar o vídeo no YouTube. Detalhes: ' + error.message });
+  }
+});
+
+// Rota para baixar áudio do YouTube
+app.get('/api/music/download', async (req, res) => {
   const { query } = req.query;
   if (!query) {
     return res.status(400).json({ error: 'Parâmetro "query" é necessário.' });
   }
 
   try {
-    const response = await ytsr(YOUTUBE_API_KEY, query);
-    const video = response.items[0];
+    // Busca o vídeo no YouTube com base no 'query'
+    const youtube = google.youtube({
+      version: 'v3',
+      auth: YOUTUBE_API_KEY,
+    });
+
+    const response = await youtube.search.list({
+      part: 'snippet',
+      q: query,
+      type: 'video',
+      maxResults: 1,
+    });
 
     if (!response.data.items || response.data.items.length === 0) {
       return res.status(404).json({ error: 'Vídeo não encontrado no YouTube.' });
@@ -290,7 +342,7 @@ app.get('/api/weather', async (req, res) => {
   }
 });
 
-//ouvir na porta ou rodar a api
+// Iniciar o servidor
 app.listen(PORT, () => {
-  console.log(`API rodando em http://localhost:${PORT}`);
+  console.log(`Servidor rodando na porta ${PORT}`);
 });
