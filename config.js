@@ -26,3 +26,12 @@ exports.API_PIXELS_URL = "https://api.pexels.com/v1";
 
 exports.METEOBLUE_API_KEY = "SGFQVlPOhIwroCKk";
 
+exports.DIFY_API_KEY = "app-gaVCJnxSmvHxVEdjXicIs1z2";
+
+exports.USER_NAME = "Zeus Lykraios";
+
+exports.MODO_DA_CONVERSA = "answer";
+
+exports.ID_DA_CONVERSA = "6b08a868-3563-41ac-870b-14429045a8bb"
+
+exports.URL_DA_IMAGEM = "https://avatars.githubusercontent.com/u/172519567?s=48&v=4"
