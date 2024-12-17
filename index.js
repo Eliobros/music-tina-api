@@ -12,7 +12,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Outras variáveis de ambiente (exemplo)
-const { YOUTUBE_API_KEY, METEOBLUE_API_KEY, AUTOR_API, DONO_API, DEVELOPMENT_DAY, NAME_API, VERSION_API, INFO_USE, DIR_GENERATE_KEY, API_PIXELS_KEY, API_PIXELS_URL } = require('./config');
+const { YOUTUBE_API_KEY, METEOBLUE_API_KEY, AUTOR_API, DONO_API, DEVELOPMENT_DAY, NAME_API, VERSION_API, INFO_USE, DIR_GENERATE_KEY, API_PIXELS_KEY, API_PIXELS_URL, DIFY_API_KEY, USER_NAME,  ID_DA_CONVERSA,  MODO_DA_CONVERSA } = require('./config');
 
 app.use(express.json()); // Para processar o corpo das requisições JSON
 app.use(express.static('public')); // Servir arquivos estáticos da pasta 'public'
@@ -226,17 +226,19 @@ app.get('/api/music', async (req, res) => {
       return res.status(404).json({ error: 'Nenhum vídeo encontrado.' });
     }
 
-    const video = response.data.items[0];
-
+    const videos = response.data.items.slice(0, 6).map(video => ({
+      Titulo: video.snippet.title,
+      Url_Do_Video: `https://www.youtube.com/watch?v=${video.id}`,
+      Capa_Do_Video: video.snippet.thumbnails.high.url,
+      Canal: video.snippet.channelTitle,
+      visualizacoes: video.statistics?.viewCount, // Usando o operador de encadeamento opcional
+    }));
+    
     res.json({
-      message: "Resultados encontrados.",
-      data: {
-        Titulo: video.snippet.title,
-        Url_Do_Video: `https://www.youtube.com/watch?v=${video.id.videoId}`,
-        Capa_Do_Video: video.snippet.thumbnails.high.url,
-        Canal: video.snippet.channelTittle,
-      },
+      message: "Resultados da sua busca.",
+      data: videos,
     });
+    
   } catch (error) {
     console.error('Erro ao buscar vídeo no YouTube:', error.message);
     res.status(500).json({ error: 'Erro ao buscar o vídeo no YouTube. Detalhes: ' + error.message });
@@ -340,6 +342,44 @@ app.get('/api/weather', async (req, res) => {
       success: false,
       message: 'Erro ao buscar previsão do tempo. Tente novamente mais tarde.',
     });
+  }
+});
+
+// rota da Inteligencia Artificial Tina 
+// Rota para enviar mensagens
+
+app.get('/api/tina/messages', async (req, res) => {
+  const { query, inputs, response_mode, user, conversation_id, files, auto_generate_name, message_id } = req.query;
+
+  // Verifica se o parâmetro query está presente
+  if (!query) {
+      return res.status(400).json({ error: 'O parâmetro query é obrigatório.' });
+  }
+
+  try {
+      // Chamar a API da Dify
+      const response = await axios.post('https://api.dify.ai/v1/chat-messages', {
+          query,
+          inputs: inputs ? JSON.parse(inputs) : {}, // Converte inputs de volta para objeto se necessário
+          response_mode,
+          user: `${USER_NAME}`,
+          conversation_id,
+          message_id,
+          files,
+          auto_generate_name: true,
+
+      }, {
+          headers: {
+              Authorization: `Bearer ${DIFY_API_KEY}`,
+              'Content-Type': 'application/json'
+          }
+      });
+
+      // Retorne a resposta da IA para o cliente
+      res.json(response.data);
+  } catch (error) {
+    console.error('Erro ao acessar a API da Dify:', error.response ? error.response.data : error.message);
+    res.status(500).json({ error: 'Erro ao acessar a API da Dify.' });
   }
 });
 
