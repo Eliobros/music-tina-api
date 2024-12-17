@@ -231,9 +231,10 @@ app.get('/api/music', async (req, res) => {
     res.json({
       message: "Resultados encontrados.",
       data: {
-        title: video.snippet.title,
-        videoUrl: `https://www.youtube.com/watch?v=${video.id.videoId}`,
-        thumbnail: video.snippet.thumbnails.high.url,
+        Titulo: video.snippet.title,
+        Url_Do_Video: `https://www.youtube.com/watch?v=${video.id.videoId}`,
+        Capa_Do_Video: video.snippet.thumbnails.high.url,
+        Canal: video.snippet.channelTittle,
       },
     });
   } catch (error) {
