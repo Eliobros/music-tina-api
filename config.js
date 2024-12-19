@@ -26,7 +26,7 @@ exports.API_PIXELS_URL = "https://api.pexels.com/v1";
 
 exports.METEOBLUE_API_KEY = "SGFQVlPOhIwroCKk";
 
-exports.DIFY_API_KEY = "app-gaVCJnxSmvHxVEdjXicIs1z2";
+exports.DIFY_API_KEY = "app-i0xXYlG5mLKH7ylsqUYa9XTC";
 
 exports.USER_NAME = "Zeus Lykraios";
 
