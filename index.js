@@ -346,37 +346,92 @@ app.get('/api/weather', async (req, res) => {
 });
 
 // rota da Inteligencia Artificial Tina 
-// Rota para enviar mensagens
+
+
+// Função para formatar data e hora
+const formatDate = () => {
+  const now = new Date();
+  const dataFormatada = now.toLocaleDateString('pt-BR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+  const horaFormatada = now.toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+
+  return { dataFormatada, horaFormatada };
+};
 
 app.get('/api/tina/messages', async (req, res) => {
   const { query, inputs, response_mode, user, conversation_id, files, auto_generate_name, message_id } = req.query;
 
-  // Verifica se o parâmetro query está presente
   if (!query) {
-      return res.status(400).json({ error: 'O parâmetro query é obrigatório.' });
+    return res.status(400).json({ error: 'O parâmetro query é obrigatório.' });
   }
 
   try {
-      // Chamar a API da Dify
-      const response = await axios.post('https://api.dify.ai/v1/chat-messages', {
-          query,
-          inputs: inputs ? JSON.parse(inputs) : {}, // Converte inputs de volta para objeto se necessário
-          response_mode: 'streaming',
-          user: `${USER_NAME}`,
-          conversation_id,
-          message_id,
-          files,
-          auto_generate_name: true,
+    const response = await axios.post(
+      'https://api.dify.ai/v1/chat-messages',
+      {
+        query,
+        inputs: inputs ? JSON.parse(inputs) : {}, // Converte inputs de volta para objeto se necessário
+        response_mode: 'stream', // Certifique-se de que o modo de resposta seja stream
+        user: `${USER_NAME}`,
+        conversation_id,
+        message_id,
+        files,
+        auto_generate_name: true,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${DIFY_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        responseType: 'stream', // Habilita streaming na resposta
+      }
+    );
 
-      }, {
-          headers: {
-              Authorization: `Bearer ${DIFY_API_KEY}`,
-              'Content-Type': 'application/json'
+    let fullResponse = '';
+
+    // Processa os chunks de dados
+    response.data.on('data', (chunk) => {
+      const lines = chunk.toString().split('\n');
+      for (const line of lines) {
+        if (line.trim() !== '') {
+          try {
+            const parsed = JSON.parse(line);
+            if (parsed.event === 'agent_message') {
+              fullResponse += parsed.answer;
+            }
+          } catch (err) {
+            console.error('Erro ao processar chunk:', err);
           }
-      });
+        }
+      }
+    });
 
-      // Retorne a resposta da IA para o cliente
-      res.json(response.data);
+    response.data.on('end', () => {
+      // Formatar data e hora
+      const { dataFormatada, horaFormatada } = formatDate();
+
+      // Retornar a resposta personalizada
+      res.json({
+        author: 'Eliobros Tech',
+        versao: '2.0.2',
+        name: 'Tina',
+        resposta: fullResponse,
+        data: dataFormatada,
+        hora: horaFormatada,
+      });
+    });
+
+    response.data.on('error', (err) => {
+      console.error('Erro no stream:', err);
+      res.status(500).json({ error: 'Erro no processamento do stream.' });
+    });
   } catch (error) {
     console.error('Erro ao acessar a API da Dify:', error.response ? error.response.data : error.message);
     res.status(500).json({ error: 'Erro ao acessar a API da Dify.' });
