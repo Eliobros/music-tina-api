@@ -372,74 +372,32 @@ const formatDate = () => {
 app.get('/api/tina/messages', async (req, res) => {
   const { query, inputs, response_mode, user, conversation_id, files, auto_generate_name, message_id } = req.query;
 
+  // Verifica se o parâmetro query está presente
   if (!query) {
-    return res.status(400).json({ error: 'O parâmetro query é obrigatório.' });
+      return res.status(400).json({ error: 'O parâmetro query é obrigatório.' });
   }
 
   try {
-    const response = await axios.post(
-      'https://api.dify.ai/v1/chat-messages',
-      {
-        query,
-        inputs: inputs ? JSON.parse(inputs) : {}, // Converte inputs de volta para objeto se necessário
-        response_mode: 'stream', // Certifique-se de que o modo de resposta seja stream
-        user: `${USER_NAME}`,
-        conversation_id,
-        message_id,
-        files,
-        auto_generate_name: true,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${DIFY_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        responseType: 'stream', // Habilita streaming na resposta
-      }
-    );
+      // Chamar a API da Dify
+      const response = await axios.post('https://api.dify.ai/v1/chat-messages', {
+          query,
+          inputs: inputs ? JSON.parse(inputs) : {}, // Converte inputs de volta para objeto se necessário
+          response_mode: 'streaming',
+          user: `${USER_NAME}`,
+          conversation_id,
+          message_id,
+          files,
+          auto_generate_name: true,
 
-    let fullResponse = '';
-
-    // Processa os chunks de dados
-    response.data.on('data', (chunk) => {
-      const lines = chunk.toString().split('\n');
-      for (const line of lines) {
-        if (line.trim() !== '') {
-          try {
-            const parsed = JSON.parse(line);
-            if (parsed.event === 'agent_message') {
-              fullResponse += parsed.answer;
-            }
-          } catch (err) {
-            console.error('Erro ao processar chunk:', err);
+      }, {
+          headers: {
+              Authorization: `Bearer ${DIFY_API_KEY}`,
+              'Content-Type': 'application/json'
           }
-        }
-      }
-    });
-
-    response.data.on('end', () => {
-      // Formatar data e hora
-      const { dataFormatada, horaFormatada } = formatDate();
-
-      // Retornar a resposta com os novos campos e a resposta original
-      res.json({
-        author: 'Eliobros Tech',
-        version: '2.0.2',
-        name: 'Tina',
-        data: dataFormatada,
-        hora: horaFormatada,
-        resposta: fullResponse, // Resposta original da API
-        query, // Adiciona o parâmetro de consulta original
-        conversation_id, // Inclui o ID da conversa
-        message_id, // Inclui o ID da mensagem
-        inputs, // Inclui os inputs recebidos
       });
-    });
 
-    response.data.on('error', (err) => {
-      console.error('Erro no stream:', err);
-      res.status(500).json({ error: 'Erro no processamento do stream.' });
-    });
+      // Retorne a resposta da IA para o cliente
+      res.json(response.data);
   } catch (error) {
     console.error('Erro ao acessar a API da Dify:', error.response ? error.response.data : error.message);
     res.status(500).json({ error: 'Erro ao acessar a API da Dify.' });
