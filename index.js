@@ -156,6 +156,11 @@ app.get('/api', (req, res) => {
   });
 });
 
+app.get('/', (req,res) => {
+
+res.send("Api rodando perfeitamente ja podes fazer requisições");
+});
+
 // Rota para gerar uma chave de API
 app.post('/api/generate-api-key', (req, res) => {
   const { apiName } = req.body;
@@ -347,7 +352,6 @@ app.get('/api/weather', async (req, res) => {
 
 // rota da Inteligencia Artificial Tina 
 
-
 // Função para formatar data e hora
 const formatDate = () => {
   const now = new Date();
@@ -417,14 +421,18 @@ app.get('/api/tina/messages', async (req, res) => {
       // Formatar data e hora
       const { dataFormatada, horaFormatada } = formatDate();
 
-      // Retornar a resposta personalizada
+      // Retornar a resposta com os novos campos e a resposta original
       res.json({
         author: 'Eliobros Tech',
-        versao: '2.0.2',
+        version: '2.0.2',
         name: 'Tina',
-        resposta: fullResponse,
         data: dataFormatada,
         hora: horaFormatada,
+        resposta: fullResponse, // Resposta original da API
+        query, // Adiciona o parâmetro de consulta original
+        conversation_id, // Inclui o ID da conversa
+        message_id, // Inclui o ID da mensagem
+        inputs, // Inclui os inputs recebidos
       });
     });
 
