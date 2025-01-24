@@ -1,4 +1,4 @@
-const express = require('express');
+8const express = require('express');
 const fs = require('fs');
 const uuid = require('uuid');
 const axios = require('axios');
@@ -361,7 +361,7 @@ app.get('/api/tina/messages', async (req, res) => {
       const response = await axios.post('https://api.dify.ai/v1/chat-messages', {
           query,
           inputs: inputs ? JSON.parse(inputs) : {}, // Converte inputs de volta para objeto se necessário
-          response_mode,
+          response_mode: 'streaming',
           user: `${USER_NAME}`,
           conversation_id,
           message_id,
